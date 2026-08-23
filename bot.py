@@ -58,11 +58,11 @@ def callback_handler(call):
     # قائمة خيارات Visa
     elif call.data == "menu_visa":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn1 = types.InlineKeyboardButton("💳 Visa - $45", callback_data="buy_visa_45")
-        btn2 = types.InlineKeyboardButton("💳 Visa - $90", callback_data="buy_visa_90")
-        btn3 = types.InlineKeyboardButton("💳 Visa - $120", callback_data="buy_visa_120")
-        btn4 = types.InlineKeyboardButton("💳 Visa - $160", callback_data="buy_visa_160")
-        btn5 = types.InlineKeyboardButton("💳 Visa - $200", callback_data="buy_visa_200")
+        btn1 = types.InlineKeyboardButton("💳 Visa - $45 have $400", callback_data="buy_visa_45")
+        btn2 = types.InlineKeyboardButton("💳 Visa - $90 have $800", callback_data="buy_visa_90")
+        btn3 = types.InlineKeyboardButton("💳 Visa - $120 have $1400", callback_data="buy_visa_120")
+        btn4 = types.InlineKeyboardButton("💳 Visa - $160 have $1800", callback_data="buy_visa_160")
+        btn5 = types.InlineKeyboardButton("💳 Visa - $200 have $2200", callback_data="buy_visa_200")
         back_btn = types.InlineKeyboardButton("🔙 Back to Main Menu", callback_data="back_home")
         markup.add(btn1, btn2, btn3, btn4, btn5, back_btn)
         
