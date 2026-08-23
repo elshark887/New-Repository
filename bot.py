@@ -101,7 +101,7 @@ def callback_handler(call):
             f"📌 *Payment Instructions:*\n"
             f"Please send the exact amount via *USDT (BEP20)* to the wallet address below:\n\n"
             f"`{USDT_WALLET}`\n\n"
-            f"⚠️ *Note:* After payment, send a screenshot of the transaction here to confirm your order!"
+            f"⚠️ *Note:* After payment, send a screenshot of the transaction here to confirm your order and txd !"
         )
         
         markup = types.InlineKeyboardMarkup()
