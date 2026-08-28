@@ -10,7 +10,7 @@ bot = telebot.TeleBot(TOKEN)
 # محفظة الـ USDT (BEP20) المطلوبة للدفع
 USDT_WALLET = "0x7Da0273E816bBAB96a6fb7285753330c48CA6Cd5"
 
-# تخزين لغة المستخدم المؤقتة (للبساطة في الذاكرة)
+# تخزين لغة المستخدم المؤقتة
 user_languages = {}
 
 # سيرفر وهمي لتجنب نوم الاستضافة المجانية
@@ -26,6 +26,12 @@ def run_web():
 # 1. القائمة الرئيسية عند كتابة /start (اختيار اللغة)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    # محاولة حذف رسالة أمر /start التي كتبها المستخدم لتنظيف الشاشة قدر الإمكان
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except Exception:
+        pass
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn_ar = types.InlineKeyboardButton("🇩🇿 العربية", callback_data="lang_ar")
     btn_en = types.InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")
@@ -42,7 +48,7 @@ def send_welcome(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     chat_id = call.message.chat.id
-    user_lang = user_languages.get(chat_id, "en") # الافتراضي إنجليزي
+    user_lang = user_languages.get(chat_id, "en")
 
     # اختيار اللغة العربية
     if call.data == "lang_ar":
@@ -96,7 +102,7 @@ def callback_handler(call):
     elif call.data == "back_home":
         show_main_menu(call.message, user_lang, edit=True)
 
-    # زر مسح الرسالة تماماً (Clear)
+    # زر مسح الرسالة تماماً وكأن شيئاً لم يكن
     elif call.data == "clear_chat":
         try:
             bot.delete_message(chat_id, call.message.message_id)
@@ -106,7 +112,7 @@ def callback_handler(call):
     # تفاصيل الدفع عند اختيار أي منتج من Black Sol أو Visa
     elif call.data.startswith("buy_bs_") or call.data.startswith("buy_visa_"):
         parts = call.data.split("_")
-        category = parts[1].upper() # BS أو VISA
+        category = parts[1].upper()
         price = parts[2]
         
         item_name = "Black Sol" if category == "BS" else "Visa"
@@ -143,8 +149,7 @@ def callback_handler(call):
         
         bot.edit_message_text(payment_text, chat_id=chat_id, message_id=call.message.message_id, reply_markup=markup, parse_mode="Markdown")
 
-
-# دالة عرض القائمة الرئيسية لتجنب التكرار
+# دالة عرض القائمة الرئيسية
 def show_main_menu(message, lang, edit=True):
     markup = types.InlineKeyboardMarkup(row_width=1)
     if lang == "ar":
@@ -168,10 +173,9 @@ def show_main_menu(message, lang, edit=True):
     else:
         bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
 
-
 if __name__ == "__main__":
     t = threading.Thread(target=run_web)
     t.start()
     
-    print("Bot is running with language selection and clear button...")
+    print("Bot is running...")
     bot.infinity_polling()
