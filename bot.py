@@ -29,8 +29,8 @@ def send_welcome(message):
     markup.add(btn_black, btn_visa)
     
     welcome_text = (
-        "🌟 *Welcome to Our Store Bot!* 🌟\n\n"
-        "Please choose a category below to browse available options:"
+        "🌟 *Welcome to renna Store Bot!* 🌟\n\n"
+        "  ay haja wla mchkl twaslo m3a da3m @renna_go:"
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
@@ -41,7 +41,7 @@ def callback_handler(call):
     # قائمة خيارات Black Sol
     if call.data == "menu_blacksoul":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn1 = types.InlineKeyboardButton("💵 $45 = 5 SOL", callback_data="buy_bs_45")
+        btn1 = types.InlineKeyboardButton("💵 $35 = 5 SOL", callback_data="buy_bs_45")
         btn2 = types.InlineKeyboardButton("💵 $90 = 10 SOL", callback_data="buy_bs_90")
         btn3 = types.InlineKeyboardButton("💵 $120 = 15 SOL", callback_data="buy_bs_120")
         btn4 = types.InlineKeyboardButton("💵 $160 = 20 SOL", callback_data="buy_bs_160")
