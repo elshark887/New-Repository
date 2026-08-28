@@ -10,6 +10,9 @@ bot = telebot.TeleBot(TOKEN)
 # محفظة الـ USDT (BEP20) المطلوبة للدفع
 USDT_WALLET = "0x7Da0273E816bBAB96a6fb7285753330c48CA6Cd5"
 
+# تخزين لغة المستخدم المؤقتة (للبساطة في الذاكرة)
+user_languages = {}
+
 # سيرفر وهمي لتجنب نوم الاستضافة المجانية
 app = Flask('')
 
@@ -20,106 +23,155 @@ def home():
 def run_web():
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 
-# 1. القائمة الرئيسية عند كتابة /start
+# 1. القائمة الرئيسية عند كتابة /start (اختيار اللغة)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     markup = types.InlineKeyboardMarkup(row_width=2)
-    btn_black = types.InlineKeyboardButton("🖤 Black Sol", callback_data="menu_blacksoul")
-    btn_visa = types.InlineKeyboardButton("💳 Visa", callback_data="menu_visa")
-    markup.add(btn_black, btn_visa)
+    btn_ar = types.InlineKeyboardButton("🇩🇿 العربية", callback_data="lang_ar")
+    btn_en = types.InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")
+    markup.add(btn_ar, btn_en)
     
     welcome_text = (
-        "🌟 *Welcome to renna Store Bot!* 🌟\n\n"
-        "  ay haja wla mchkl twaslo m3a da3m @renna_go:"
+        "🌟 *Welcome to renna Store Bot!*\n"
+        "مرحباً بك في بوت المتجر!\n\n"
+        "Please choose your language / يرجى اختيار لغتك:"
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
 # 2. استقبال الضغطات على الأزرار (Callback Queries)
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    
+    chat_id = call.message.chat.id
+    user_lang = user_languages.get(chat_id, "en") # الافتراضي إنجليزي
+
+    # اختيار اللغة العربية
+    if call.data == "lang_ar":
+        user_languages[chat_id] = "ar"
+        show_main_menu(call.message, "ar")
+
+    # اختيار اللغة الإنجليزية
+    elif call.data == "lang_en":
+        user_languages[chat_id] = "en"
+        show_main_menu(call.message, "en")
+
     # قائمة خيارات Black Sol
-    if call.data == "menu_blacksoul":
+    elif call.data == "menu_blacksoul":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn1 = types.InlineKeyboardButton("💵 $35 = 5 SOL", callback_data="buy_bs_45")
+        btn1 = types.InlineKeyboardButton("💵 $35 = 5 SOL", callback_data="buy_bs_35")
         btn2 = types.InlineKeyboardButton("💵 $90 = 10 SOL", callback_data="buy_bs_90")
         btn3 = types.InlineKeyboardButton("💵 $120 = 15 SOL", callback_data="buy_bs_120")
         btn4 = types.InlineKeyboardButton("💵 $160 = 20 SOL", callback_data="buy_bs_160")
         btn5 = types.InlineKeyboardButton("💵 $200 = 25 SOL", callback_data="buy_bs_200")
-        back_btn = types.InlineKeyboardButton("🔙 Back to Main Menu", callback_data="back_home")
-        markup.add(btn1, btn2, btn3, btn4, btn5, back_btn)
         
-        bot.edit_message_text("🖤 *Black Sol Section*\nSelect your desired option below:", 
-                              chat_id=call.message.chat.id, 
-                              message_id=call.message.message_id, 
-                              reply_markup=markup, 
-                              parse_mode="Markdown")
+        back_text = "🔙 العودة للقائمة" if user_lang == "ar" else "🔙 Back to Main Menu"
+        clear_text = "🗑️ مسح الكل (Clear)" if user_lang == "ar" else "🗑️ Clear All"
+        
+        back_btn = types.InlineKeyboardButton(back_text, callback_data="back_home")
+        clear_btn = types.InlineKeyboardButton(clear_text, callback_data="clear_chat")
+        markup.add(btn1, btn2, btn3, btn4, btn5, back_btn, clear_btn)
+        
+        text = "🖤 *قسم Black Sol*\nاختر الخيار المناسب لك أدناه:" if user_lang == "ar" else "🖤 *Black Sol Section*\nSelect your desired option below:"
+        bot.edit_message_text(text, chat_id=chat_id, message_id=call.message.message_id, reply_markup=markup, parse_mode="Markdown")
 
     # قائمة خيارات Visa
     elif call.data == "menu_visa":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn1 = types.InlineKeyboardButton("💳 Visa - $35 have $400", callback_data="buy_visa_45")
+        btn1 = types.InlineKeyboardButton("💳 Visa - $35 have $400", callback_data="buy_visa_35")
         btn2 = types.InlineKeyboardButton("💳 Visa - $90 have $800", callback_data="buy_visa_90")
         btn3 = types.InlineKeyboardButton("💳 Visa - $120 have $1400", callback_data="buy_visa_120")
         btn4 = types.InlineKeyboardButton("💳 Visa - $160 have $1800", callback_data="buy_visa_160")
         btn5 = types.InlineKeyboardButton("💳 Visa - $200 have $2200", callback_data="buy_visa_200")
-        back_btn = types.InlineKeyboardButton("🔙 Back to Main Menu", callback_data="back_home")
-        markup.add(btn1, btn2, btn3, btn4, btn5, back_btn)
         
-        bot.edit_message_text("💳 *Visa Section*\nSelect your desired option below:", 
-                              chat_id=call.message.chat.id, 
-                              message_id=call.message.message_id, 
-                              reply_markup=markup, 
-                              parse_mode="Markdown")
+        back_text = "🔙 العودة للقائمة" if user_lang == "ar" else "🔙 Back to Main Menu"
+        clear_text = "🗑️ مسح الكل (Clear)" if user_lang == "ar" else "🗑️ Clear All"
+        
+        back_btn = types.InlineKeyboardButton(back_text, callback_data="back_home")
+        clear_btn = types.InlineKeyboardButton(clear_text, callback_data="clear_chat")
+        markup.add(btn1, btn2, btn3, btn4, btn5, back_btn, clear_btn)
+        
+        text = "💳 *قسم Visa*\nاختر الخيار المناسب لك أدناه:" if user_lang == "ar" else "💳 *Visa Section*\nSelect your desired option below:"
+        bot.edit_message_text(text, chat_id=chat_id, message_id=call.message.message_id, reply_markup=markup, parse_mode="Markdown")
 
     # زر الرجوع للقائمة الرئيسية
     elif call.data == "back_home":
-        markup = types.InlineKeyboardMarkup(row_width=2)
-        btn_black = types.InlineKeyboardButton("🖤 Black Sol", callback_data="menu_blacksoul")
-        btn_visa = types.InlineKeyboardButton("💳 Visa", callback_data="menu_visa")
-        markup.add(btn_black, btn_visa)
-        
-        bot.edit_message_text("🌟 *Welcome to Our Store Bot!* 🌟\n\nPlease choose a category below to browse available options:", 
-                              chat_id=call.message.chat.id, 
-                              message_id=call.message.message_id, 
-                              reply_markup=markup, 
-                              parse_mode="Markdown")
+        show_main_menu(call.message, user_lang, edit=True)
+
+    # زر مسح الرسالة تماماً (Clear)
+    elif call.data == "clear_chat":
+        try:
+            bot.delete_message(chat_id, call.message.message_id)
+        except Exception:
+            pass
 
     # تفاصيل الدفع عند اختيار أي منتج من Black Sol أو Visa
     elif call.data.startswith("buy_bs_") or call.data.startswith("buy_visa_"):
-        # استخراج السعر أو تفاصيل الطلب بناءً على الضغطة
         parts = call.data.split("_")
         category = parts[1].upper() # BS أو VISA
         price = parts[2]
         
         item_name = "Black Sol" if category == "BS" else "Visa"
         
-        payment_text = (
-            f"🛒 *Order Details:*\n"
-            f"• Item: {item_name}\n"
-            f"• Price: ${price} USDT\n\n"
-            f"📌 *Payment Instructions:*\n"
-            f"Please send the exact amount via *USDT (BEP20)* to the wallet address below:\n\n"
-            f"`{USDT_WALLET}`\n\n"
-            f"⚠️ *Note:* After payment, send a screenshot of the transaction here to confirm your order and txd !"
-        )
+        if user_lang == "ar":
+            payment_text = (
+                f"🛒 *تفاصيل الطلب:*\n"
+                f"• المنتج: {item_name}\n"
+                f"• السعر: ${price} USDT\n\n"
+                f"📌 *تعليمات الدفع:*\n"
+                f"يرجى إرسال المبلغ بالضبط عبر شبكة *USDT (BEP20)* إلى عنوان المحفظة أدناه:\n\n"
+                f"`{USDT_WALLET}`\n\n"
+                f"⚠️ *ملاحظة:* بعد الدفع، أرسل لقطة écran (صورة) للتحويل هنا لتأكيد طلبك و txd !"
+            )
+            back_text = "🔙 العودة للقائمة"
+            clear_text = "🗑️ مسح الكل (Clear)"
+        else:
+            payment_text = (
+                f"🛒 *Order Details:*\n"
+                f"• Item: {item_name}\n"
+                f"• Price: ${price} USDT\n\n"
+                f"📌 *Payment Instructions:*\n"
+                f"Please send the exact amount via *USDT (BEP20)* to the wallet address below:\n\n"
+                f"`{USDT_WALLET}`\n\n"
+                f"⚠️ *Note:* After payment, send a screenshot of the transaction here to confirm your order and txd !"
+            )
+            back_text = "🔙 Back to Menu"
+            clear_text = "🗑️ Clear All"
         
-        markup = types.InlineKeyboardMarkup()
-        back_btn = types.InlineKeyboardButton("🔙 Back to Menu", callback_data="back_home")
-        markup.add(back_btn)
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        back_btn = types.InlineKeyboardButton(back_text, callback_data="back_home")
+        clear_btn = types.InlineKeyboardButton(clear_text, callback_data="clear_chat")
+        markup.add(back_btn, clear_btn)
         
-        bot.edit_message_text(payment_text, 
-                              chat_id=call.message.chat.id, 
-                              message_id=call.message.message_id, 
-                              reply_markup=markup, 
-                              parse_mode="Markdown")
+        bot.edit_message_text(payment_text, chat_id=chat_id, message_id=call.message.message_id, reply_markup=markup, parse_mode="Markdown")
+
+
+# دالة عرض القائمة الرئيسية لتجنب التكرار
+def show_main_menu(message, lang, edit=True):
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    if lang == "ar":
+        btn_black = types.InlineKeyboardButton("🖤 Black Sol", callback_data="menu_blacksoul")
+        btn_visa = types.InlineKeyboardButton("💳 Visa", callback_data="menu_visa")
+        clear_btn = types.InlineKeyboardButton("🗑️ مسح الرسالة (Clear)", callback_data="clear_chat")
+        markup.add(btn_black, btn_visa, clear_btn)
+        text = "🌟 *مرحباً بك في بوت المتجر!* 🌟\n\nالرجاء اختيار القسم المطلوب تصفحه أدناه:"
+    else:
+        btn_black = types.InlineKeyboardButton("🖤 Black Sol", callback_data="menu_blacksoul")
+        btn_visa = types.InlineKeyboardButton("💳 Visa", callback_data="menu_visa")
+        clear_btn = types.InlineKeyboardButton("🗑️ Clear Chat", callback_data="clear_chat")
+        markup.add(btn_black, btn_visa, clear_btn)
+        text = "🌟 *Welcome to Our Store Bot!* 🌟\n\nPlease choose a category below to browse available options:"
+
+    if edit:
+        try:
+            bot.edit_message_text(text, chat_id=message.chat.id, message_id=message.message_id, reply_markup=markup, parse_mode="Markdown")
+        except Exception:
+            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
+    else:
+        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
 
 
 if __name__ == "__main__":
-    # تشغيل السيرفر في الخلفية
     t = threading.Thread(target=run_web)
     t.start()
     
-    # تشغيل البوت
-    print("Bot is running with buttons...")
+    print("Bot is running with language selection and clear button...")
     bot.infinity_polling()
