@@ -33,8 +33,8 @@ def send_welcome(message):
         pass
 
     markup = types.InlineKeyboardMarkup(row_width=2)
-    btn_ar = types.InlineKeyboardButton("🇩🇿 العربية", callback_data="lang_ar")
-    btn_en = types.InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")
+    btn_ar = types.InlineKeyboardButton(" العربية", callback_data="lang_ar")
+    btn_en = types.InlineKeyboardButton(" English", callback_data="lang_en")
     markup.add(btn_ar, btn_en)
     
     welcome_text = (
