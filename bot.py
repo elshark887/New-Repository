@@ -63,11 +63,11 @@ def callback_handler(call):
     # قائمة خيارات Black Sol
     elif call.data == "menu_blacksoul":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn1 = types.InlineKeyboardButton("💵 $35 = 5 SOL", callback_data="buy_bs_35")
-        btn2 = types.InlineKeyboardButton("💵 $90 = 10 SOL", callback_data="buy_bs_90")
-        btn3 = types.InlineKeyboardButton("💵 $120 = 15 SOL", callback_data="buy_bs_120")
-        btn4 = types.InlineKeyboardButton("💵 $160 = 20 SOL", callback_data="buy_bs_160")
-        btn5 = types.InlineKeyboardButton("💵 $200 = 25 SOL", callback_data="buy_bs_200")
+        btn1 = types.InlineKeyboardButton("💵 $35 = 3.8 SOL", callback_data="buy_bs_35")
+        btn2 = types.InlineKeyboardButton("💵 $90 = 7.5 SOL", callback_data="buy_bs_90")
+        btn3 = types.InlineKeyboardButton("💵 $120 = 11 SOL", callback_data="buy_bs_120")
+        btn4 = types.InlineKeyboardButton("💵 $160 = 15 SOL", callback_data="buy_bs_160")
+        btn5 = types.InlineKeyboardButton("💵 $200 = 22 SOL", callback_data="buy_bs_200")
         
         back_text = "🔙 العودة للقائمة" if user_lang == "ar" else "🔙 Back to Main Menu"
         clear_text = "🗑️ مسح الكل (Clear)" if user_lang == "ar" else "🗑️ Clear All"
