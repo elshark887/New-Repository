@@ -8,7 +8,7 @@ TOKEN = "8875256622:AAFITd9tC9O5Y2EcMuTSfNEraN6ihlBWciA"
 bot = telebot.TeleBot(TOKEN)
 
 # محفظة الـ USDT (BEP20) المطلوبة للدفع
-USDT_WALLET = "0x7Da0273E816bBAB96a6fb7285753330c48CA6Cd5"
+USDT_WALLET = "0xeeabeb6520394f2e910547e7431df6b2401a92ef"
 
 # تخزين لغة المستخدم المؤقتة
 user_languages = {}
@@ -23,35 +23,46 @@ def home():
 def run_web():
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 
-# 1. القائمة الرئيسية عند كتابة /start (اختيار اللغة)
-@bot.message_handler(commands=['start'])
+# 1. الترحيب التلقائي فور دخول المستخدم (عند إرسال أي رسالة أو فتح البوت)
+@bot.message_handler(func=lambda message: True)
 def send_welcome(message):
-    # محاولة حذف رسالة أمر /start التي كتبها المستخدم لتنظيف الشاشة قدر الإمكان
+    chat_id = message.chat.id
+    
+    # محاولة تنظيف رسالة المستخدم قدر الإمكان
     try:
-        bot.delete_message(message.chat.id, message.message_id)
+        bot.delete_message(chat_id, message.message_id)
     except Exception:
         pass
 
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    btn_ar = types.InlineKeyboardButton(" العربية", callback_data="lang_ar")
-    btn_en = types.InlineKeyboardButton(" English", callback_data="lang_en")
-    markup.add(btn_ar, btn_en)
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    btn_start = types.InlineKeyboardButton("✨ Enter Renna Black Sol Bot ✨", callback_data="start_bot_action")
+    markup.add(btn_start)
     
-    welcome_text = (
-        "🌟 *Welcome to renna Store Bot!*\n"
-        "مرحباً بك في بوت المتجر!\n\n"
-        "Please choose your language / يرجى اختيار لغتك:"
-    )
-    bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="Markdown")
+    welcome_text = "Welcome to renna Black Sol Bot!"
+    bot.send_message(chat_id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
 # 2. استقبال الضغطات على الأزرار (Callback Queries)
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     chat_id = call.message.chat.id
-    user_lang = user_languages.get(chat_id, "en")
+    user_lang = user_languages.get(chat_id, "ar")
+
+    # الانتقال لوظيفة البوت الطبيعية واختيار اللغة عند الضغط على زر الدخول
+    if call.data == "start_bot_action":
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        btn_ar = types.InlineKeyboardButton(" العربية", callback_data="lang_ar")
+        btn_en = types.InlineKeyboardButton(" English", callback_data="lang_en")
+        markup.add(btn_ar, btn_en)
+        
+        lang_text = (
+            "🌟 *Welcome to renna Store Bot!*\n"
+            "مرحباً بك في بوت المتجر!\n\n"
+            "Please choose your language / يرجى اختيار لغتك:"
+        )
+        bot.edit_message_text(lang_text, chat_id=chat_id, message_id=call.message.message_id, reply_markup=markup, parse_mode="Markdown")
 
     # اختيار اللغة العربية
-    if call.data == "lang_ar":
+    elif call.data == "lang_ar":
         user_languages[chat_id] = "ar"
         show_main_menu(call.message, "ar")
 
